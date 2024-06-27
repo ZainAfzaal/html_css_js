@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>rock,paper,scissor</title>
+    <style>
+        .img {
+
+            height: 50px;
+        }
+
+        .buttonimg {
+            border: 3px solid white;
+            width: 120px;
+            height: 120px;
+            border-radius: 60px;
+            background-color: transparent;
+            margin-right: 10px;
+        }
+
+        .resetbutton {
+            border: none;
+            padding: 8px 15px;
+            font-size: 15px;
+        }
+
+        .autoplay-button {
+            border: none;
+            padding: 8px 15px;
+            font-size: 15px;
+        }
+
+        .yes-button,
+        .no-button {
+            border: none;
+            padding: 8px 15px;
+            font-size: 15px;
+            margin-left: 5px;
+        }
+
+        .result {
+            font-weight: bold;
+            font-size: 25px;
+            margin-top: 50px;
+        }
+
+        .score {
+            margin-top: 60px;
+        }
+
+        .heading {
+            font-size: 30px;
+            font-weight: bold;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body style="
+font-family: Arial;
+background-color: black;
+color: white;
+">
+    <p class="heading">Rock Paper Scissors</p>
+
+    <button class="buttonimg js-rock-button">
+        <img class="img" src="images/rock-emoji.png"></button>
+
+    <button class="buttonimg" onclick="
+    equivalance('paper');"><img class="img" src="images/paper-emoji.png"></button>
+
+    <button class="buttonimg" onclick="
+    equivalance('scissors');"><img class="img" src="images/scissors-emoji.png"></button>
+
+    <p class="js-result result"></p>
+    <p class="js-move"></p>
+    <p class="js-score score"></p>
+
+
+    <button class="resetbutton js-reset-button" onclick="showconfirmation();">Reset Score</button>
+
+    <button class="autoplay-button js-autoplay-button" onclick="autoplay();">Auto Play</button>
+
+    <p class="js-reset-confirmation"></p>
+
+
+    <!--This is the method to make link with another page or
+    another website of same or diff/projects.
+    just by writing the file name etc.
+    -->
+    <a href="website2.html">
+        <div style="color: yellow;">calculator</div>
+    </a>
+
+    <script>
+        let score = JSON.parse(localStorage.getItem
+            ('score')) || {
+            wins: 0,
+            looses: 0,
+            ties: 0
+        };
+
+        updateElement();
+
+        let isautoplaying = false;
+        let intervalid;
+
+        function autoplay() {
+            if (!isautoplaying) {
+                intervalid = setInterval(() => {
+                    const playermove = pickmove();
+                    equivalance(playermove);
+                }, 1000);
+                isautoplaying = true;
+            } else {
+                clearInterval(intervalid);
+                isautoplaying = false;
+            }
+            buttonplay();
+        }
+
+        //This is another way to of onclick method
+        //Instead of using in html we use in script
+        document.querySelector('.js-rock-button')
+            .addEventListener('click', () => {
+                equivalance('rock');
+            });
+
+
+        document.body.addEventListener('keydown', (event) => {
+            if (event.key === 'r') {
+                equivalance('rock');
+            } else if (event.key === 'p') {
+                equivalance('paper');
+            } else if (event.key === 's') {
+                equivalance('scissors');
+            }
+        })
+
+        function equivalance(playermove) {
+
+            const computerMove = pickmove();
+
+
+            let results = '';
+
+            if (playermove === 'scissors') {
+
+                if (computerMove === 'rock') {
+                    results = 'You loose.';
+                } else if (computerMove === 'paper') {
+                    results = 'You win!';
+                } else if (computerMove === 'scissors') {
+                    results = 'Tie.';
+                }
+
+            } else if (playermove === 'paper') {
+
+                if (computerMove === 'rock') {
+                    results = 'You win!';
+                } else if (computerMove === 'paper') {
+                    results = 'Tie.';
+                } else if (computerMove === 'scissors') {
+                    results = 'You loose.';
+                }
+
+            } else if (playermove === 'rock') {
+
+                if (computerMove === 'rock') {
+                    results = 'Tie.';
+                } else if (computerMove === 'paper') {
+                    results = 'You loose.';
+                } else if (computerMove === 'scissors') {
+                    results = 'You win!';
+                }
+
+            }
+
+
+            if (results === 'You win!') {
+                score.wins += 1;
+            } else if (results === 'You loose.') {
+                score.looses += 1;
+            } else if (results === 'Tie.') {
+                score.ties += 1;
+            }
+
+            localStorage.setItem('score', JSON.stringify(score));
+
+            updateElement();
+
+            document.querySelector('.js-result')
+                .innerHTML = results;
+
+
+            document.querySelector('.js-move')
+                .innerHTML = `
+                 You
+                <img src="images/${playermove}-emoji.png" class="img">
+                Computer
+                <img src="images/${computerMove}-emoji.png" class="img">
+                `;
+
+
+        }
+
+        function updateElement() {
+            document.querySelector('.js-score')
+                .innerHTML = `Wins:${score.wins}, Loose:${score.looses}, Tie:${score.ties}`;
+
+        }
+
+
+        function pickmove() {
+            const randomNumber = Math.random();
+
+            let computerMove = '';
+
+            if (randomNumber < 1 / 3) {
+                computerMove = 'rock';
+            } else if (randomNumber < 2 / 3) {
+                computerMove = 'paper';
+            } else {
+                computerMove = 'scissors';
+            }
+
+
+            return computerMove;
+        }
+
+        function buttonplay() {
+            const buttonplay = document.querySelector('.js-autoplay-button');
+            if (buttonplay.innerText === 'Auto Play') {
+                buttonplay.innerHTML = 'Stop Play';
+            } else {
+                buttonplay.innerHTML = 'Auto Play';
+            }
+        }
+
+        function resetscore() {
+            score.wins = 0;
+            score.looses = 0;
+            score.ties = 0;
+            localStorage.removeItem('score');
+            updateElement();
+            showconfirmation();
+        };
+
+        function showconfirmation() {
+            document.querySelector('.js-reset-confirmation')
+                .innerHTML = `  
+            Are you sure to want to reset the score?
+            <button class="js-yes yes-button" >Yes</button>
+            <button class="js-no no-button" >No</button>
+            `;
+
+            document.querySelector('.js-yes')
+                .addEventListener('click', () => {
+                    resetscore();
+                    hideconfirmation();
+                });
+
+            document.querySelector('.js-no')
+                .addEventListener('click', () => {
+                    hideconfirmation();
+                });
+        }
+
+        function hideconfirmation() {
+            document.querySelector('.js-reset-confirmation')
+                .innerHTML = '';
+        }
+
+    </script>
+</body>
+
+</html>
